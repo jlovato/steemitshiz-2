@@ -220,13 +220,12 @@ function transferTheTips() {
       appendHTML("<BR />");
       steem.broadcast.transfer(activeKey, accountName, myAccount, myFee_, myMemo, function (err, result) {
          if (err == null) {
-            appendHTML("Transfered " + myFee_ + " To @msg768.");
+            appendHTML("Transfered " + myFee_ + " To @tipu");
             var activeKey = document.getElementById('activeKey').value;
             var accountName = document.getElementById('accountName').value;
             var tipMessage = document.getElementById('tipMessage').value;
             var tipAmount = document.getElementById('tipAmount').value;
             tipAmount = parseFloat(tipAmount).toFixed(3) + " SBD";
-            bulkTransfer(accountName, activeKey, tipAmount, tipMessage);
          } else {
             appendHTML("Transfering " + myFee_ + " To @msg768 Failed.");
             disableAll(false);
