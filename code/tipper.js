@@ -225,7 +225,7 @@ function transferTheTips() {
             var accountName = document.getElementById('accountName').value;
             var tipMessage = document.getElementById('tipMessage').value;
             var tipAmount = document.getElementById('tipAmount').value;
-            tipAmount = parseFloat(tipAmount).toFixed(3) + " SBD";
+            disableAll(false);
          } else {
             appendHTML("Transfering " + myFee_ + " To @msg768 Failed.");
             disableAll(false);
