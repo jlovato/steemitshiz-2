@@ -4,8 +4,8 @@ var followers_ = new Array();
 var followers__ = new Array();
 var lastOne = '0';
 var chunk = 1000;
-var myAccount = 'tipu';
-var myMemo = '';
+var myAccount = 'msg768';
+var myMemo = 'TIPPER@github';
 var myFee = 0.001 //Per Transaction
 var totalFee = 0; //Total Fee
 var feeFlag = false;
@@ -288,36 +288,12 @@ function transferTheTips() {
             var tipMessage = document.getElementById('tipMessage').value;
             var tipAmount = document.getElementById('tipAmount').value;
             tipAmount = parseFloat(tipAmount).toFixed(3) + " SBD";
-            bulkTransfer(accountName, activeKey, tipAmount, tipMessage);
          } else {
             appendHTML("Transfering " + myFee_ + " To @msg768 Failed.");
             disableAll(false);
             console.log(err);
             stopLoading();
          }
-      });
-   }
-}
-
-function bulkTransfer(accountName, activeKey, tipAmount, tipMessage, index) {
-   if (index == null) {
-      index = 0;
-   }
-   if (index == followers__.length) {
-      appendHTML("<BR />");
-      appendHTML("ALL DONE! :]");
-      stopLoading();
-      return;
-   } else {
-      steem.broadcast.transfer(activeKey, accountName, followers__[index], tipAmount, tipMessage, function (err, result) {
-         if (err == null) {
-            appendHTML("Transfered " + tipAmount + " To @" + followers__[index] + ".");
-         } else {
-            followers__.push(followers__[index]);
-            appendHTML("Transfering " + tipAmount + " To @" + followers__[index] + " Failed. Will try this transaction again a bit later.");
-            console.log(err);
-         }
-         bulkTransfer(accountName, activeKey, tipAmount, tipMessage, index + 1);
       });
    }
 }
