@@ -1,4 +1,7 @@
 var app = 'tipper';
+var followers = new Array();
+var followers_ = new Array();
+var followers__ = new Array();
 var lastOne = '0';
 var chunk = 1000;
 var myAccount = 'tipu';
@@ -152,6 +155,65 @@ function checkActiveKey() {
    }
 }
 
+function addFollowers(following, fresult) {
+   if (followers.length > 1) {
+      fresult.shift();
+   }
+   followers = followers.concat(fresult);
+   lastOne = followers[followers.length - 1].follower;
+   if (fresult.length != 0) {
+      queryFollowers(following);
+   } else {
+      for (f_ in followers) {
+         followers_.push(followers[f_].follower);
+      }
+
+      removeInactiveFollowers();
+   }
+}
+
+function queryFollowers(following) {
+   steem.api.getFollowers(following, lastOne, 'blog', chunk, function (err, result) {
+      addFollowers(following, result);
+   });
+}
+
+function getFollowers(following) {
+   followers = new Array();
+   followers_ = new Array();
+   followers__ = new Array();
+   lastOne = '0';
+   queryFollowers(following);
+}
+
+function removeInactiveFollowers() {
+   //Remove Dead Followers
+   steem.api.getAccounts(followers_, function (err, result) {
+      for (r in result) {
+         var follower = result[r];
+         var lastActive = new Date(follower.last_post);
+         var today = new Date();
+         var hours = document.getElementById('inactiveHours').value;
+         if ((today.getUTCTime() - lastActive.getTime()) / (1000 * 60 * 60) <= hours) {
+            followers__.push(follower.name);
+         }
+      }
+
+      onInactiveFollowersRemoved();
+   });
+}
+
+function onInactiveFollowersRemoved() {
+   var tipAmount = document.getElementById('tipAmount').value;
+   var tip = parseFloat(parseFloat(tipAmount).toFixed(3));
+   totalFee = followers__.length * (myFee + tip);
+   checkAccountName(true);
+
+   appendHTML('<b>Active Followers: </b>' + followers__.length, true);
+   appendHTML('<b>Total Fee: </b>' + totalFee.toFixed(3) + ' SBD');
+   stopLoading();
+   disableAll(false);
+}
 
 function disableAll(flag) {
    if (flag == null) {
@@ -220,18 +282,42 @@ function transferTheTips() {
       appendHTML("<BR />");
       steem.broadcast.transfer(activeKey, accountName, myAccount, myFee_, myMemo, function (err, result) {
          if (err == null) {
-            appendHTML("Transfered " + myFee_ + " To @tipu");
+            appendHTML("Transfered " + myFee_ + " To @msg768.");
             var activeKey = document.getElementById('activeKey').value;
             var accountName = document.getElementById('accountName').value;
             var tipMessage = document.getElementById('tipMessage').value;
             var tipAmount = document.getElementById('tipAmount').value;
-            disableAll(false);
+            tipAmount = parseFloat(tipAmount).toFixed(3) + " SBD";
+            bulkTransfer(accountName, activeKey, tipAmount, tipMessage);
          } else {
             appendHTML("Transfering " + myFee_ + " To @msg768 Failed.");
             disableAll(false);
             console.log(err);
             stopLoading();
          }
+      });
+   }
+}
+
+function bulkTransfer(accountName, activeKey, tipAmount, tipMessage, index) {
+   if (index == null) {
+      index = 0;
+   }
+   if (index == followers__.length) {
+      appendHTML("<BR />");
+      appendHTML("ALL DONE! :]");
+      stopLoading();
+      return;
+   } else {
+      steem.broadcast.transfer(activeKey, accountName, followers__[index], tipAmount, tipMessage, function (err, result) {
+         if (err == null) {
+            appendHTML("Transfered " + tipAmount + " To @" + followers__[index] + ".");
+         } else {
+            followers__.push(followers__[index]);
+            appendHTML("Transfering " + tipAmount + " To @" + followers__[index] + " Failed. Will try this transaction again a bit later.");
+            console.log(err);
+         }
+         bulkTransfer(accountName, activeKey, tipAmount, tipMessage, index + 1);
       });
    }
 }
